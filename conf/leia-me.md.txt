@@ -1,0 +1,10 @@
+Essa pasta contêm arquivos de configurações. 
+
+
+1. Arquivo opencode.json Este arquivo contém as configurações utilizadas pelo OpenCode, sendo responsável por definir parâmetros e comportamentos necessários para o funcionamento da ferramenta no projeto. 
+Para que as configurações sejam aplicadas corretamente, o arquivo deve ser copiado para a raiz do projeto, conforme a estrutura abaixo:
+
+ projeto/ 
+ └── opencode.json
+
+
