@@ -18,7 +18,10 @@ Toda funcionalidade desenvolvida pelo fluxo de agentes deixa um rastro verificá
 | `04-testes-integracao.md` | agente-testes | fluxos integrados cobertos, mocks/MSW e fixtures usados, **saída real** do comando, testes E2E Playwright quando aplicáveis |
 | `05-code-review.md` | agente-code-review | achados de bugs, segurança, legibilidade, performance, boas práticas e manutenibilidade por severidade (alta/média/baixa), veredito SEM BLOQUEIO/BLOQUEADO |
 | `06-checklist-qualidade.md` | agente-qualidade | cada item da `GENERAL.ChecklistDeQualidade` com ✅/❌/N/A, saída dos comandos, riscos técnicos, veredito final |
-| `07-commit.md` | orquestrador | mensagem de commit sugerida, hash após aprovação, arquivos incluídos |
+| `07-aprendizado.md` | orquestrador | uma linha por item de cada `## RETROSPECTIVA` (`Erros detectados`, `Lições novas propostas`) e por desvio de protocolo notado pelo orquestrador: `item → L-<nnn> (criada \| reaberta)` ou `descartado: <motivo>`; IDs das lições aplicadas por agente; critério em `GENERAL.AutoAperfeicoamento` ("Critério de registro") |
+| `08-commit.md` | orquestrador | mensagem de commit sugerida, hash após aprovação, arquivos incluídos |
+
+O arquivo principal de cada etapa — o que a definição do agente manda gravar (`00-spec.md`, `01-backend.md`, `02-frontend.md`, `03-testes-unitarios.md`, `05-code-review.md`, `06-checklist-qualidade.md` e os equivalentes do `/consertar`) — termina com a seção `## Retrospectiva` (formato em `GENERAL.AutoAperfeicoamento`). Arquivo complementar, como `04-testes-integracao.md`, fica dispensado: a retrospectiva do `agente-testes` vive no `03`. `STATUS.md`, `07-aprendizado.md` e `08-commit.md` são só do orquestrador: nenhum agente edita o `STATUS.md`, e cada um reporta o andamento no bloco `## RESULTADO`. Lições e métricas consolidadas ficam fora da pasta da funcionalidade, em `docs/aprendizado/licoes/L-<nnn>.md`, `docs/aprendizado/INDICE.md` e `docs/aprendizado/metricas.md`, escritos pelo orquestrador.
 
 ## Regras de escrita
 
@@ -43,7 +46,8 @@ Início: YYYY-MM-DD HH:mm · Ciclo de correção: 0/3
 | 4 | Testes | agente-testes | | | 03-testes-unitarios.md, 04-testes-integracao.md |
 | 5 | Revisão de código | agente-code-review | | | 05-code-review.md |
 | 6 | Qualidade | agente-qualidade | | | 06-checklist-qualidade.md |
-| 7 | Commit | orquestrador | | | 07-commit.md |
+| 7 | Aprendizado | orquestrador | | | 07-aprendizado.md |
+| 8 | Commit | orquestrador | | | 08-commit.md |
 
 ## Delegações
 - (nenhuma)
@@ -65,8 +69,9 @@ O fluxo de correção de bug (`/consertar`) usa a mesma pasta e o mesmo `STATUS.
 | `03-testes-unitarios.md`, `04-testes-integracao.md` | agente-testes | mesmo conteúdo mínimo da tabela acima; `04` registra "N/A" com justificativa quando não há integração aplicável |
 | `05-code-review-final.md` | agente-code-review | achados e veredito da segunda passagem, depois dos testes |
 | `06-checklist-qualidade.md` | agente-qualidade | mesmo conteúdo mínimo da tabela acima |
-| `07-commit.md` | orquestrador | mesmo conteúdo mínimo da tabela acima |
+| `07-aprendizado.md` | orquestrador | mesmo conteúdo mínimo da tabela acima; inclui as retrospectivas das duas revisões de código |
+| `08-commit.md` | orquestrador | mesmo conteúdo mínimo da tabela acima |
 
 ## Definição de "concluído"
 
-Uma funcionalidade só é considerada concluída quando `STATUS.md` mostra as etapas 1 a 6 como ✅, `05-code-review.md` termina com `VEREDITO: SEM BLOQUEIO` e `06-checklist-qualidade.md` termina com `VEREDITO: APROVADO`. A etapa 7 depende da aprovação humana do commit.
+Uma funcionalidade só é considerada concluída quando `STATUS.md` mostra as etapas 1 a 7 como ✅ (a 7, Aprendizado, exige `07-aprendizado.md` gravado, mesmo sem erro a registrar), `05-code-review.md` termina com `VEREDITO: SEM BLOQUEIO` e `06-checklist-qualidade.md` termina com `VEREDITO: APROVADO`. A etapa 8 depende da aprovação humana do commit.
