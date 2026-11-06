@@ -1,12 +1,12 @@
 ---
 description: Encaminha para o agente-requisitos (criação/atualização do requisito), corrige a causa raiz, roda revisão de código, testes unitários e de integração, e uma revisão de código final — via agentes especializados
-agent: build
+argument-hint: <descrição do problema> | <caminho/para/relatorio-bug.md>
 ---
 
-@.opencode/rules/general/GENERAL.Diretrizes.instructions.md
-@.opencode/rules/general/GENERAL.Evidencias.instructions.md
-@.opencode/rules/general/GENERAL.FluxoAgentes.instructions.md
-@.opencode/rules/general/GENERAL.DiretrizesRegrasGovernancaGit.instructions.md
+@.claude/rules/general/GENERAL.Diretrizes.instructions.md
+@.claude/rules/general/GENERAL.Evidencias.instructions.md
+@.claude/rules/general/GENERAL.FluxoAgentes.instructions.md
+@.claude/rules/general/GENERAL.DiretrizesRegrasGovernancaGit.instructions.md
 
 Você é o **orquestrador** do fluxo de correção de bugs. Diferente de `/nova-funcionalidade`, aqui não existe uma funcionalidade nova do zero — o ponto de partida é um problema que já existe no projeto. Mas, a partir desta versão, **toda correção passa pelo `agente-requisitos` antes de qualquer código ser alterado**: a diferença para `/nova-funcionalidade` é que a entrevista é abreviada (Passo 2) e parte do diagnóstico que você mesmo produziu no Passo 1, em vez de uma spec vazia. O objetivo é que toda correção fique vinculada a um requisito formal, passe por revisão de código antes e depois dos testes, e seja validada por uma suíte completa.
 
@@ -29,9 +29,12 @@ Se `$ARGUMENTS` contiver um caminho terminado em `.md` e o arquivo existir, leia
    | 5 | Testes | agente-testes | 03-testes-unitarios.md, 04-testes-integracao.md |
    | 6 | Revisão de código (final) | agente-code-review | 05-code-review-final.md |
    | 7 | Qualidade | agente-qualidade | 06-checklist-qualidade.md |
-   | 8 | Commit | orquestrador | 07-commit.md |
+   | 8 | Aprendizado | orquestrador | 07-aprendizado.md |
+   | 9 | Commit | orquestrador | 08-commit.md |
 
 2. Registre o ponto fixo do git para o diff final: `git rev-parse HEAD` → anote em `STATUS.md` como `Base: <hash>`. Se houver alterações não commitadas fora do escopo, avise o usuário antes de começar. Se o diretório ainda não for repositório git, avise e pergunte como prosseguir (não rode `git init` sozinho num bug fix — isso é decisão do usuário).
+
+3. **Aprendizado:** se `docs/aprendizado/` não existir, crie-o agora (`licoes/`, `INDICE.md` e `metricas.md` com os templates de `GENERAL.AutoAperfeicoamento`), antes de chamar qualquer agente. Leia o `INDICE.md`, derive as tags do problema e anote os IDs de lição que se aplicam a cada agente — você os passa em cada chamada.
 
 ## Passo 1 — Diagnóstico (você mesmo, sem subagente)
 
@@ -50,8 +53,8 @@ Chame `agente-requisitos` em **modo correção**. A entrada de início é: o pro
 
 O agente decide, a partir disso, entre gravar um adendo numa spec já existente ou uma spec nova restrita à correção — e conduz, se necessário, uma entrevista **abreviada** (0 a 3 perguntas, só quando o diagnóstico deixar dúvida real sobre o comportamento correto esperado). Segue o mesmo protocolo de ping-pong de `GENERAL.FluxoAgentes`:
 
-- **`## PERGUNTA`** → faça a pergunta ao usuário de verdade com `question tool` (a "Sugestão" do agente vira a primeira opção). Retome o mesmo agente com a resposta.
-- **`## SPEC PARA APROVAÇÃO`** → mostre o resumo ao usuário e pergunte, com `question tool`, Aprovar / Ajustar / Cancelar. Retome o agente com a decisão.
+- **`## PERGUNTA`** → faça a pergunta ao usuário de verdade com `AskUserQuestion` (a "Sugestão" do agente vira a primeira opção). Retome o mesmo agente com a resposta.
+- **`## SPEC PARA APROVAÇÃO`** → mostre o resumo ao usuário e pergunte, com `AskUserQuestion`, Aprovar / Ajustar / Cancelar. Retome o agente com a decisão.
 - **`## RESULTADO: CONCLUÍDO`** → marque a etapa 2 em `STATUS.md` e siga para o Passo 3.
 - **`## RESULTADO: BLOQUEADO`** (usuário cancelou) → registre em `STATUS.md` e **encerre o comando aqui**, sem chamar mais nenhum agente.
 - Nenhum desses blocos → chame de novo pedindo só o bloco — não presuma sucesso.
@@ -98,14 +101,23 @@ Chame `agente-qualidade` com a pasta, a lista de arquivos e `Base: <hash>` (incl
 
 Mesmo limite e mecânica de `GENERAL.FluxoAgentes`: incremente `Ciclo de correção: N/3` em `STATUS.md` — contado em conjunto entre o Passo 4, o Passo 5, o Passo 6 e o Passo 7 —, devolva para o(s) agente(s) indicado(s) em `Devolver para`, reexecute `agente-testes`, revise de novo com `agente-code-review` e só então siga para o próximo passo pendente (ou para `agente-qualidade`). No terceiro ciclo reprovado/bloqueado, pare e apresente ao usuário os achados pendentes, o que foi tentado, e pergunte se deseja intervir manualmente, aceitar o risco (registrando em `06-checklist-qualidade.md`) ou cancelar.
 
-## Passo 8 — Commit (pausa humana)
+## Passo 8 — Aprendizado (obrigatório, antes do commit)
 
-Somente com `VEREDITO: APROVADO`:
+Siga `GENERAL.AutoAperfeicoamento` (seção "Critério de registro"). Marque a etapa 8 em `STATUS.md` como 🔄 e execute, nesta ordem:
+
+1. Percorra a `## RETROSPECTIVA` de **cada** agente que rodou (inclusive de ciclos de correção) e os desvios que você mesmo notou (bloco ausente, evidência não gravada, agente chamado de novo só para reenviar o bloco).
+2. Para cada item, grave uma linha em `docs/evidencias/<slug>/07-aprendizado.md`: `item → L-<nnn> (criada | reaberta)` ou `descartado: <motivo>`.
+3. Crie ou atualize `licoes/L-<nnn>.md` e `INDICE.md`, acrescente a linha em `metricas.md` e proponha promoção de lições `validada`, sem editar regras ou agentes por conta própria. Em correção de bug, trate com atenção especial a **reincidência**: se a causa raiz já consta numa lição, reabra-a e reavalie a ação em vez de repetir a mesma correção.
+4. Só marque a etapa 8 ✅ com `07-aprendizado.md` gravado, mesmo sem erro algum (registre "nenhum erro; nenhuma lição" e o efeito das lições aplicadas). O Passo 9 não começa sem isso.
+
+## Passo 9 — Commit (pausa humana)
+
+Somente com `VEREDITO: APROVADO` e a etapa 8 (Aprendizado) ✅:
 
 1. `git status` e `git diff --stat <Base>...HEAD` — confirme que só há arquivos da correção e de `docs/evidencias/<slug>/`.
 2. Proponha a mensagem no padrão `GENERAL.DiretrizesRegrasGovernancaGit` (`fix(<escopo>): <resumo em pt-BR imperativo>`, corpo explicando a causa raiz, o requisito vinculado (link relativo para `00-spec.md` ou para o adendo, quando aplicável) e o que foi corrigido, mais o link relativo para `docs/evidencias/<slug>/`).
-3. Grave `07-commit.md` com a mensagem proposta.
-4. Pergunte: **"Posso realizar o commit dessas alterações?"** e aguarde. Só execute `git add` granular e `git commit` após resposta afirmativa. Registre o hash em `07-commit.md` e marque a etapa 8.
+3. Grave `08-commit.md` com a mensagem proposta. Inclua `docs/aprendizado/` em linha própria dos arquivos do commit.
+4. Pergunte: **"Posso realizar o commit dessas alterações?"** e aguarde. Só execute `git add` granular e `git commit` após resposta afirmativa. Registre o hash em `08-commit.md` e marque a etapa 9.
 5. **Nunca** execute `git push`. Informe que o push é manual.
 
 ## Relatório final ao usuário
@@ -125,7 +137,6 @@ Tela curta, sem repetir o conteúdo das evidências:
 - Você só edita código no Passo 1 se for necessário para reproduzir o bug (ex.: um script temporário de diagnóstico) — nunca a correção em si; a correção é sempre de `agente-backend`/`agente-frontend`.
 - Se o diagnóstico concluir que não há causa corrigível no código (dado incorreto, ambiente, decisão de produto), pare no Passo 1, explique ao usuário e não acione mais nenhum agente — nem o `agente-requisitos`.
 - Você nunca escreve nem aprova o `00-spec.md` sozinho: isso é sempre do `agente-requisitos`, com aprovação explícita do usuário.
+- Cada chamada de agente leva os IDs das lições aplicáveis ao papel dele (escolhidos no Passo 0). Os agentes só propõem lições; quem as grava em `docs/aprendizado/` é você, no Passo 8.
 - `STATUS.md` é atualizado **antes** de chamar o próximo agente, nunca em lote no final.
 - Se um agente retornar sem o bloco esperado para a etapa em curso (`## RESULTADO`, ou `## PERGUNTA`/`## SPEC PARA APROVAÇÃO` no Passo 2), chame-o de novo pedindo apenas o bloco — não presuma sucesso.
-
-> Uso: `/consertar <descrição do problema> | <caminho/para/relatorio-bug.md>` — argumentos disponíveis como `$ARGUMENTS`.
